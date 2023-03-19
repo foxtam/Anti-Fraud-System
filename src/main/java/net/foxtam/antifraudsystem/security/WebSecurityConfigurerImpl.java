@@ -1,5 +1,6 @@
 package net.foxtam.antifraudsystem.security;
 
+import net.foxtam.antifraudsystem.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
@@ -38,8 +39,25 @@ public class WebSecurityConfigurerImpl extends WebSecurityConfigurerAdapter {
                 .and()
                 .csrf().disable() // for Postman
                 .authorizeRequests() // manage access
-                .antMatchers(HttpMethod.POST, "/api/auth/user").permitAll()
-                .antMatchers("/actuator/shutdown").permitAll() // needs to run test
+                
+                .antMatchers(HttpMethod.POST, "/api/auth/user")
+                .permitAll()
+                
+                .antMatchers("/actuator/shutdown")
+                .permitAll()
+                
+                .mvcMatchers(HttpMethod.DELETE, "/api/auth/user")
+                .hasRole(Role.ADMINISTRATOR.name())
+                
+                .mvcMatchers(HttpMethod.GET, "/api/auth/list")
+                .hasAnyRole(Role.ADMINISTRATOR.name(), Role.SUPPORT.name())
+                
+                .mvcMatchers(HttpMethod.POST, "/api/antifraud/transaction")
+                .hasRole(Role.MERCHANT.name())
+                
+                .mvcMatchers(HttpMethod.PUT, "/api/auth/access", "/api/auth/role")
+                .hasRole(Role.ADMINISTRATOR.name())
+                
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement()
