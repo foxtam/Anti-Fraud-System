@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import net.foxtam.antifraudsystem.Role;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -17,7 +18,6 @@ import javax.validation.constraints.NotBlank;
 @Entity
 @Table(name = "users")
 public class User {
-    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -35,6 +35,13 @@ public class User {
     @Column(name = "password")
     private String password;
     
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role")
+    private Role role;
+    
+    @Column(name = "locked")
+    private boolean locked = true;
+    
     @JsonCreator
     public User(@JsonProperty("name") String name,
                 @JsonProperty("username") String username,
@@ -47,5 +54,10 @@ public class User {
     @JsonIgnore
     public String getPassword() {
         return password;
+    }
+
+    @JsonIgnore
+    public boolean isLocked() {
+        return locked;
     }
 }
