@@ -1,4 +1,4 @@
-package net.foxtam.antifraudsystem.service;
+package net.foxtam.antifraudsystem.exceptions;
 
 public class RoleAlreadyProvidedException extends Exception {
     public RoleAlreadyProvidedException(String msg) {

@@ -39,25 +39,31 @@ public class WebSecurityConfigurerImpl extends WebSecurityConfigurerAdapter {
                 .and()
                 .csrf().disable() // for Postman
                 .authorizeRequests() // manage access
-                
+
                 .antMatchers(HttpMethod.POST, "/api/auth/user")
                 .permitAll()
-                
+
                 .antMatchers("/actuator/shutdown")
                 .permitAll()
-                
+
                 .mvcMatchers(HttpMethod.DELETE, "/api/auth/user")
                 .hasRole(Role.ADMINISTRATOR.name())
-                
+
                 .mvcMatchers(HttpMethod.GET, "/api/auth/list")
                 .hasAnyRole(Role.ADMINISTRATOR.name(), Role.SUPPORT.name())
-                
+
                 .mvcMatchers(HttpMethod.POST, "/api/antifraud/transaction")
                 .hasRole(Role.MERCHANT.name())
-                
+
                 .mvcMatchers(HttpMethod.PUT, "/api/auth/access", "/api/auth/role")
                 .hasRole(Role.ADMINISTRATOR.name())
-                
+
+                .mvcMatchers("/api/antifraud/suspicious-ip", "/api/antifraud/suspicious-ip/*")
+                .hasRole(Role.SUPPORT.name())
+
+                .mvcMatchers("/api/antifraud/stolencard", "/api/antifraud/stolencard/*")
+                .hasRole(Role.SUPPORT.name())
+
                 .anyRequest().authenticated()
                 .and()
                 .sessionManagement()

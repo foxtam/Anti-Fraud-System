@@ -1,8 +1,13 @@
 package net.foxtam.antifraudsystem.controller;
 
 import net.foxtam.antifraudsystem.Lock;
+import net.foxtam.antifraudsystem.Role;
+import net.foxtam.antifraudsystem.exceptions.AlreadyExistsException;
+import net.foxtam.antifraudsystem.exceptions.NotFoundException;
+import net.foxtam.antifraudsystem.exceptions.RoleAlreadyProvidedException;
+import net.foxtam.antifraudsystem.exceptions.WrongRoleException;
 import net.foxtam.antifraudsystem.model.User;
-import net.foxtam.antifraudsystem.service.*;
+import net.foxtam.antifraudsystem.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,12 +17,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 
 @RestController
 public class UserController {
-
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
@@ -34,7 +40,7 @@ public class UserController {
         try {
             userService.register(user);
             return new ResponseEntity<>(user, HttpStatus.CREATED);
-        } catch (UsernameAlreadyExistsException e) {
+        } catch (AlreadyExistsException e) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
@@ -62,7 +68,7 @@ public class UserController {
             return ResponseEntity.ok(user);
         } catch (WrongRoleException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        } catch (NotFoundUserException e) {
+        } catch (NotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } catch (RoleAlreadyProvidedException e) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
@@ -76,10 +82,16 @@ public class UserController {
             String lockInfo = userLock.operation() == Lock.LOCK ? "locked" : "unlocked";
             String userInfo = "User %s %s!".formatted(userLock.username(), lockInfo);
             return ResponseEntity.ok(Map.of("status", userInfo));
-        } catch (NotFoundUserException e) {
+        } catch (NotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (WrongRoleException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    public record UserLock(@NotBlank String username, @NotNull Lock operation) {
+    }
+
+    public record UserRole(@NotBlank String username, @NotNull Role role) {
     }
 }
